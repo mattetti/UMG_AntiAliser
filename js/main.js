@@ -5,34 +5,25 @@ function ProcessAll() {
   const gCanvas = document.getElementById('originalCanvasG');
   const bCanvas = document.getElementById('originalCanvasB');
 
-  processImage(rCanvas, 'r');
-  processImage(gCanvas, 'g');
-  processImage(bCanvas, 'b');
+  const aaCanvasR = document.getElementById('aaCanvasR');
+  const aaCanvasG = document.getElementById('aaCanvasG');
+  const aaCanvasB = document.getElementById('aaCanvasB');
 
-  const modCanvasR = document.getElementById('modifiedCanvasR');
-  const modCanvasG = document.getElementById('modifiedCanvasG');
-  const modCanvasB = document.getElementById('modifiedCanvasB');
+  let modCanvasR = document.getElementById('modifiedCanvasR');
+  let modCanvasG = document.getElementById('modifiedCanvasG');
+  let modCanvasB = document.getElementById('modifiedCanvasB');
 
-  // find the largest canvas
-  let largestWidth = 0;
-  let largestHeight = 0;
-  if (modCanvasR.width > largestWidth) {
-    largestWidth = modCanvasR.width;
-  }
-  if (modCanvasG.width > largestWidth) {
-    largestWidth = modCanvasG.width;
-  }
-  if (modCanvasB.width > largestWidth) {
-    largestWidth = modCanvasB.width;
-  }
-  if (modCanvasR.height > largestHeight) {
-    largestHeight = modCanvasR.height;
-  }
+  processImage(rCanvas, aaCanvasR);
+  processImage(gCanvas, aaCanvasG);
+  processImage(bCanvas, aaCanvasB);
+  processImage(rCanvas, modCanvasR, 'r');
+  processImage(gCanvas, modCanvasG, 'g');
+  processImage(bCanvas, modCanvasB, 'b');
 
   const packedCanvas = mergeCanvases(modCanvasR, modCanvasG, modCanvasB);
-  const rgbCanvas = document.getElementById('modifiedCanvasRGB');
-  rgbCanvas.width = largestWidth;
-  rgbCanvas.height = largestHeight;
+  let rgbCanvas = document.getElementById('packedCanvas');
+  rgbCanvas.width = packedCanvas.width;
+  rgbCanvas.height = packedCanvas.height;
   const rgbCtx = rgbCanvas.getContext('2d');
   rgbCtx.clearRect(0, 0, rgbCanvas.width, rgbCanvas.height);
   rgbCtx.drawImage(packedCanvas, 0, 0);
@@ -52,14 +43,34 @@ function loadAndDrawImage(layer) {
   let srcCanvas = document.getElementById('originalCanvas' + layer.toUpperCase());
   let srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
   let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
+  let aaCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
 
   const img = new Image();
   img.onload = () => {
+    const minSize = getMinSize();
     // Resize the canvas to match the image size
     srcCanvas.width = img.width;
-    srcCanvas.height = img.height;
-    dstCanvas.width = img.width;
-    dstCanvas.height = img.height;
+    if (img.width < minSize) {
+      srcCanvas.width = minSize;
+      const scale = minSize / img.width;
+      srcCanvas.height = img.height * scale;
+    } else {
+      srcCanvas.width = img.width;
+      srcCanvas.height = img.height;
+    }
+
+    dstCanvas.width = srcCanvas.width;
+    dstCanvas.height = srcCanvas.height;
+
+    aaCanvas.width = srcCanvas.width;
+    aaCanvas.height = srcCanvas.height;
+
+    const packedCanvas = document.getElementById('packedCanvas');
+    if (srcCanvas.width > packedCanvas.width || srcCanvas.height > packedCanvas.height) {
+      packedCanvas.width = srcCanvas.width;
+      packedCanvas.height = srcCanvas.width;
+    }
+
     // Draw the image onto the canvas
     srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
     const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
@@ -87,13 +98,14 @@ function loadAndDrawImage(layer) {
     //   // bright
     //   bg.style.backgroundColor = '#CCC';
     // }
-    processImage(srcCanvas, layer);
+    // processImage(srcCanvas, dstCanvas, layer);
+    // processImage(srcCanvas, aaCanvas);
+    ProcessAll();
   };
   img.src = URL.createObjectURL(input);
 
 
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  document.getElementById('processButton').style.display = 'inline';
   showBlurSlider();
 }
 
@@ -101,6 +113,7 @@ function loadAndDrawImageURL(imgURL, layer) {
   let srcCanvas = document.getElementById('originalCanvas' + layer.toUpperCase());
   let srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
   let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
+  let aaCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
 
   const img = new Image();
   img.onload = () => {
@@ -112,16 +125,27 @@ function loadAndDrawImageURL(imgURL, layer) {
     // Draw the image onto the canvas
     srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
     const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-    processImage(srcCanvas, layer);
+    processImage(srcCanvas, dstCanvas, layer);
+    processImage(srcCanvas, aaCanvas);
   };
   img.src = imgURL;
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  document.getElementById('processButton').style.display = 'inline';
   showBlurSlider();
 }
 
 // Function to apply anti-aliasing, Gaussian blur, and premultiplied alpha to the image
-function processImage(canvasToProcess, layerChannel) {
+function processImage(canvasToProcess, dstCanvas, layerChannel) {
+  if(isCanvasBlank(canvasToProcess)) {
+    console.log(`processImage: ${canvasToProcess.id} is a blank canvas`);
+    const minSize = getMinSize();
+    canvasToProcess.width = minSize;
+    canvasToProcess.height = minSize;
+    dstCanvas.width = minSize;
+    dstCanvas.height = minSize;
+    return;
+  }
+  let ch = layerChannel == undefined ? 'all' : layerChannel;
+  console.log('processImage(' + canvasToProcess.id + ', ' + dstCanvas.id + ', ' + ch + ')');
   // Get the pixel data from the canvas
   const ctxToProcess = canvasToProcess.getContext('2d', { willReadFrequently: true });
   const imageData = ctxToProcess.getImageData(0, 0, canvasToProcess.width, canvasToProcess.height);
@@ -136,17 +160,14 @@ function processImage(canvasToProcess, layerChannel) {
     imageData.data[i + 1] = Math.round((g * a) / 255);
     imageData.data[i + 2] = Math.round((b * a) / 255);
   }
+  // TODO: we don't seem to be using this data
 
   // set layerChannel = 'r' to convert the layer to a single red channel;
   let channelIndex = { r: 0, g: 1, b: 2, all: -1 }[layerChannel];
   if (channelIndex === undefined) {
     channelIndex = -1;
   }
-  if (Object.keys(srcFilenames).length < 2) {
-    channelIndex = -1;
-  }
 
-  let dstCanvas = document.getElementById('modifiedCanvas' + layerChannel.toUpperCase());
   let dstCtx = dstCanvas.getContext('2d');
 
   const edgeCanvas = document.createElement('canvas');
@@ -154,6 +175,7 @@ function processImage(canvasToProcess, layerChannel) {
   edgeCanvas.height = canvasToProcess.height;
   const edgeCtx = edgeCanvas.getContext('2d');
   let baseCanvas
+  // console.log("channelIndex: " + channelIndex);
   if (channelIndex > -1) {
     baseCanvas = convertToSingleChannel(canvasToProcess, layerChannel);
   } else {
@@ -214,6 +236,17 @@ function processImage(canvasToProcess, layerChannel) {
   // Show/hide the buttons
   document.getElementById('downloadButtonRGB').style.display = 'inline';
   // document.getElementById('processButton').style.display = 'none';
+}
+
+// returns true if every pixel's uint32 representation is 0 (or "blank")
+function isCanvasBlank(canvas) {
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+
+  const pixelBuffer = new Uint32Array(
+    context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+  );
+
+  return !pixelBuffer.some(color => color !== 0);
 }
 
 function download(layer) {
@@ -321,8 +354,29 @@ function mergeCanvases(rCanvas, gCanvas, bCanvas) {
 
   // Create a new canvas for the merged image
   const mergedCanvas = document.createElement('canvas');
-  mergedCanvas.width = rCanvas.width;
-  mergedCanvas.height = rCanvas.height;
+  let largestWidth = 0;
+  let largestHeight = 0;
+  if (rCanvas.width > largestWidth) {
+    largestWidth = rCanvas.width;
+  }
+  if (gCanvas.width > largestWidth) {
+    largestWidth = gCanvas.width;
+  }
+  if (bCanvas.width > largestWidth) {
+    largestWidth = bCanvas.width;
+  }
+  if (rCanvas.height > largestHeight) {
+    largestHeight = rCanvas.height;
+  }
+  if (gCanvas.height > largestHeight) {
+    largestHeight = gCanvas.height;
+  }
+  if (bCanvas.height > largestHeight) {
+    largestHeight = bCanvas.height;
+  }
+
+  mergedCanvas.width = largestWidth;
+  mergedCanvas.height = largestHeight;
   const mergedCtx = mergedCanvas.getContext('2d');
 
   mergedCtx.globalCompositeOperation = 'lighter';
@@ -332,9 +386,9 @@ function mergeCanvases(rCanvas, gCanvas, bCanvas) {
   mergedCtx.fillRect(0, 0, mergedCanvas.width, mergedCanvas.height);
 
   // Draw the red canvas onto the merged canvas
-  mergedCtx.drawImage(rCanvas, 0, 0);
-  mergedCtx.drawImage(gCanvas, 0, 0);
-  mergedCtx.drawImage(bCanvas, 0, 0);
+  mergedCtx.drawImage(rCanvas, 0, 0, mergedCanvas.width, mergedCanvas.height);
+  mergedCtx.drawImage(gCanvas, 0, 0, mergedCanvas.width, mergedCanvas.height);
+  mergedCtx.drawImage(bCanvas, 0, 0, mergedCanvas.width, mergedCanvas.height);
 
   // Return the merged canvas
   return mergedCanvas;
@@ -349,6 +403,10 @@ function hideBlurSlider() {
   document.getElementById('blur-slider-div').style.display = 'none';
 }
 
+function getMinSize() {
+  return document.getElementById('sizeSlider').value;
+}
+
 
 // When the DOM is ready, add event listeners
 window.addEventListener("DOMContentLoaded", (event) => {
@@ -360,6 +418,31 @@ window.addEventListener("DOMContentLoaded", (event) => {
   // Add an event listener to update the blur value display
   blurSlider.addEventListener('input', () => {
     blurValueDisplay.textContent = 'Blur:' + blurSlider.value + 'px';
+    ProcessAll();
+  });
+
+  const sizeSlider = document.getElementById('sizeSlider');
+  const sizeValueDisplay = document.getElementById('sizeValueDisplay');
+  sizeValueDisplay.textContent = 'Min Size:' + sizeSlider.value + 'px';
+
+  // Add an event listener to update the size value display
+  sizeSlider.addEventListener('input', () => {
+    const minSize = sizeSlider.value;
+    sizeValueDisplay.textContent = 'Min Size:' + minSize + 'px';
+
+    // look for all the canvases with the class 'output-canvas'
+    const outputCanvases = document.getElementsByClassName('output-canvas');
+    for (let i = 0; i < outputCanvases.length; i++) {
+      let canvas = outputCanvases[i];
+      if (canvas.width < minSize)
+      {
+        canvas.width = minSize;
+      }
+      if (canvas.height < minSize)
+      {
+        canvas.height = minSize;
+      }
+    }
     ProcessAll();
   });
 
@@ -392,14 +475,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
     }
   );
 
-  // Event listener for the process button
-  // convert this event listener into a lambda function
-  document.getElementById('processButton').addEventListener('click',
-    () => {
-      ProcessAll();
-    }
-  );
-
   document.getElementById('downloadButtonR').addEventListener('click', () => {
     download("r");
   });
@@ -416,7 +491,6 @@ window.addEventListener("DOMContentLoaded", (event) => {
     download("rgb");
   });
 
-  console.log('test');
   document.getElementById('loadExampleButton').addEventListener('click', () => {
     loadAndDrawImageURL("./images/play.svg", "r");
     loadAndDrawImageURL("./images/stop.svg", "g");

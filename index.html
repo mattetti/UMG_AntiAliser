@@ -30,6 +30,9 @@
       Pick a 3rd image
       <input type="file" id="fileInputB" accept="image/*" style="display:none" />
     </button>
+    <div>
+      <button id="loadExampleButton">Load Example Images</button>
+    </div>
   </div>
 
 
@@ -37,43 +40,68 @@
     <div id="blur-slider-div">
       <input type="range" min="0" max="10" step="0.1" value="7" id="blurSlider">
       <!-- <label for="blurSlider">Applied Blur</label> -->
-      <div id="blurValueDisplay">Blur: ${document.getElementById('blurSlider').value}px</div>
+      <div id="blurValueDisplay"></div>
     </div>
-    <div id="canvases" style="background: #CCC; display: flex;">
+
+    <div id="size-slider-div" style="display: none;">
+      <input type="range" min="32" max="512" step="1" value="128" id="sizeSlider">
+      <div id="sizeValueDisplay"></div>
+    </div>
+
+    <div class="canvases">
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="originalCanvasR" width="128" height="128"></canvas>
+        <canvas class="output-canvas" id="originalCanvasR"></canvas>
       </div>
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="modifiedCanvasR" width="128" height="128"></canvas>
+        <canvas class="output-canvas" id="aaCanvasR"></canvas>
+        <button id="downloadButtonAAR" style="display:none;">Download</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <canvas class="output-canvas" id="originalCanvasG"></canvas>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <canvas class="output-canvas" id="aaCanvasG"></canvas>
+        <button id="downloadButtonAAG" style="display:none;">Download</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <canvas class="output-canvas" id="originalCanvasB"></canvas>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <canvas class="output-canvas" id="aaCanvasB"></canvas>
+        <button id="downloadButtonAAB" style="display:none;">Download</button>
+      </div>
+
+
+    </div>
+
+    <div class="canvases">
+
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <canvas class="output-canvas" id="modifiedCanvasR"></canvas>
         <button id="downloadButtonR" style="display:none;">Download</button>
       </div>
 
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="originalCanvasG" width="128" height="128"></canvas>
-      </div>
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="modifiedCanvasG" width="128" height="128"></canvas>
+        <canvas class="output-canvas" id="modifiedCanvasG"></canvas>
         <button id="downloadButtonG" style="display:none;">Download</button>
       </div>
 
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="originalCanvasB" width="128" height="128"></canvas>
-      </div>
-      <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="modifiedCanvasB" width="128" height="128"></canvas>
+        <canvas class="output-canvas" id="modifiedCanvasB"></canvas>
         <button id="downloadButtonB" style="display:none;">Download</button>
       </div>
 
+    </div>
+    <div class="canvases">
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <canvas id="modifiedCanvasRGB" width="128" height="128"></canvas>
-        <button id="processButton" style="display:none;">Pack Image</button>
+        <canvas class="output-canvas" id="packedCanvas"></canvas>
+        <!-- <button id="processButton" style="display:none;">Pack Image</button> -->
         <button id="downloadButtonRGB" style="display:none;">Download</button>
       </div>
-    </div>
+      </div>
 
-    <div>
-      <button id="loadExampleButton">Load Example Images</button>
-    </div>
   </div>
 
 </body>
