@@ -1,0 +1,99 @@
+/* Set some basic styles for the page */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  background-color: #f8f8f8;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+#instructions {
+  font-size: 1.2em;
+  text-align: center;
+}
+
+/* Style the file pickers */
+
+#file-pickers {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1em;
+}
+
+#file-pickers button {
+  margin-right: 1em;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Style the canvases */
+
+#canvases {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#canvases div {
+  margin: 1em;
+}
+
+canvas {
+  width: 128px;
+  height: 128px;
+  border: 1px solid #ccc;
+}
+
+/* Style the blur slider */
+
+#blur-slider-div {
+  margin-bottom: 1em;
+}
+
+#blurSlider {
+  width: 100%;
+}
+
+#blurValueDisplay {
+  font-size: 1.2em;
+  text-align: center;
+  margin-top: 0.5em;
+}
+
+/* Style the buttons */
+
+button {
+  margin-top: 1em;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Hide the download buttons and more by default */
+
+#processButton,
+#blur-slider-div,
+#downloadButtonR,
+#downloadButtonG,
+#downloadButtonB,
+#downloadButtonRGB {
+  display: none;
+}
