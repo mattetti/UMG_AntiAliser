@@ -64,34 +64,57 @@ function loadAndDrawImage(layer) {
     srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
     const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
     // check if the image is bright or dark
-    const threshold = 20;
-    const pixels = imageData.data;
-    let totalR = 0, totalG = 0, totalB = 0;
-    for (let i = 0; i < pixels.length; i += 4) {
-      totalR += pixels[i];
-      totalG += pixels[i + 1];
-      totalB += pixels[i + 2];
-    }
-    const averageR = totalR / (pixels.length / 4);
-    const averageG = totalG / (pixels.length / 4);
-    const averageB = totalB / (pixels.length / 4);
-    const brightness = (averageR + averageG + averageB) / 3;
-    console.log("brightness: " + brightness)
-    const bg = document.getElementById('processingBlock');
-    if (brightness < threshold) {
-      console.log('dark');
-      // dark
-      bg.style.backgroundColor = 'white';
-    } else {
-      console.log('bright');
-      // bright
-      bg.style.backgroundColor = '#CCC';
-    }
+    // const threshold = 20;
+    // const pixels = imageData.data;
+    // let totalR = 0, totalG = 0, totalB = 0;
+    // for (let i = 0; i < pixels.length; i += 4) {
+    //   totalR += pixels[i];
+    //   totalG += pixels[i + 1];
+    //   totalB += pixels[i + 2];
+    // }
+    // const averageR = totalR / (pixels.length / 4);
+    // const averageG = totalG / (pixels.length / 4);
+    // const averageB = totalB / (pixels.length / 4);
+    // const brightness = (averageR + averageG + averageB) / 3;
+    // console.log("brightness: " + brightness)
+    // const bg = document.getElementById('processingBlock');
+    // if (brightness < threshold) {
+    //   console.log('dark');
+    //   // dark
+    //   bg.style.backgroundColor = 'white';
+    // } else {
+    //   console.log('bright');
+    //   // bright
+    //   bg.style.backgroundColor = '#CCC';
+    // }
     processImage(srcCanvas, layer);
   };
   img.src = URL.createObjectURL(input);
 
 
+  document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
+  document.getElementById('processButton').style.display = 'inline';
+  showBlurSlider();
+}
+
+function loadAndDrawImageURL(imgURL, layer) {
+  let srcCanvas = document.getElementById('originalCanvas' + layer.toUpperCase());
+  let srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
+  let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
+
+  const img = new Image();
+  img.onload = () => {
+    // Resize the canvas to match the image size
+    srcCanvas.width = img.width;
+    srcCanvas.height = img.height;
+    dstCanvas.width = img.width;
+    dstCanvas.height = img.height;
+    // Draw the image onto the canvas
+    srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
+    const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+    processImage(srcCanvas, layer);
+  };
+  img.src = imgURL;
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
   document.getElementById('processButton').style.display = 'inline';
   showBlurSlider();
@@ -317,22 +340,6 @@ function mergeCanvases(rCanvas, gCanvas, bCanvas) {
   return mergedCanvas;
 }
 
-function loadExampleImages() {
-  console.log('Loading example images');
-  const fileInputR = document.getElementById("fileInputR");
-  const fileInputG = document.getElementById("fileInputG");
-  const fileInputB = document.getElementById("fileInputB");
-
-  fileInputR.files[0] = new File(["images/pause.svg"], "pause.svg");
-  fileInputG.files[0] = new File(["images/play.svg"], "play.svg");
-  fileInputB.files[0] = new File(["images/stop.svg"], "stop.svg");
-
-  // Trigger change events on file input elements
-  fileInputR.dispatchEvent(new Event('change'));
-  fileInputG.dispatchEvent(new Event('change'));
-  fileInputB.dispatchEvent(new Event('change'));
-}
-
 
 function showBlurSlider() {
   document.getElementById('blur-slider-div').style.display = 'inline';
@@ -411,8 +418,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   console.log('test');
   document.getElementById('loadExampleButton').addEventListener('click', () => {
-    loadExampleImages();
-    // ProcessAll();
+    loadAndDrawImageURL("./images/play.svg", "r");
+    loadAndDrawImageURL("./images/stop.svg", "g");
+    loadAndDrawImageURL("./images/pause.svg", "b");
+    ProcessAll();
   });
 
 });
