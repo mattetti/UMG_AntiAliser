@@ -118,7 +118,7 @@ function loadAndDrawImageURL(imgURL, layer) {
   const img = new Image();
   img.onload = () => {
     // Resize the canvas to match the image size or min size
-    srcCanvas.width = img.width;
+    const minSize = getMinSize();
     if (img.width < minSize) {
       srcCanvas.width = minSize;
       const scale = minSize / img.width;
