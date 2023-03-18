@@ -113,9 +113,6 @@ function loadAndDrawImage(layer) {
   document.getElementById('downloadButton' + layer.toUpperCase()).disabled = false;
   document.getElementById("downloadButtonAA"+ layer.toUpperCase()).disabled = false;
   document.getElementById("downloadButtonRGB").disabled = false;
-
-  // document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  // document.getElementById('downloadButtonAA' + layer.toUpperCase()).style.display = 'inline';
   showSliders();
 }
 
@@ -125,8 +122,9 @@ function loadAndDrawImageURL(imgURL, layer) {
     loadInCanvas(img, layer);
   };
   img.src = imgURL;
-  document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  document.getElementById('downloadButtonAA' + layer.toUpperCase()).style.display = 'inline';
+  document.getElementById('downloadButton' + layer.toUpperCase()).disabled = false;
+  document.getElementById("downloadButtonAA"+ layer.toUpperCase()).disabled = false;
+  document.getElementById("downloadButtonRGB").disabled = false;
   showSliders();
 }
 
