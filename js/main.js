@@ -117,11 +117,27 @@ function loadAndDrawImageURL(imgURL, layer) {
 
   const img = new Image();
   img.onload = () => {
-    // Resize the canvas to match the image size
+    // Resize the canvas to match the image size or min size
     srcCanvas.width = img.width;
-    srcCanvas.height = img.height;
-    dstCanvas.width = img.width;
-    dstCanvas.height = img.height;
+    if (img.width < minSize) {
+      srcCanvas.width = minSize;
+      const scale = minSize / img.width;
+      srcCanvas.height = img.height * scale;
+    } else {
+      srcCanvas.width = img.width;
+      srcCanvas.height = img.height;
+    }
+    dstCanvas.width = srcCanvas.width;
+    dstCanvas.height = srcCanvas.height;
+    aaCanvas.width = srcCanvas.width;
+    aaCanvas.height = srcCanvas.height;
+
+    const packedCanvas = document.getElementById('packedCanvas');
+    if (srcCanvas.width > packedCanvas.width || srcCanvas.height > packedCanvas.height) {
+      packedCanvas.width = srcCanvas.width;
+      packedCanvas.height = srcCanvas.width;
+    }
+
     // Draw the image onto the canvas
     srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
     const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
