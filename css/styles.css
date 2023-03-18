@@ -55,20 +55,36 @@ canvas {
   border: 1px solid #ccc;
 }
 
-/* Style the blur slider */
+#sliders {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 
-#blur-slider-div {
-  margin-bottom: 1em;
+
+#blur-slider-div, #size-slider-div {
+  display: flex;
+  align-items: center;
+}
+
+#size-slider-div input[type="range"] {
+  margin-left: 10px;
+}
+
+#blur-slider-div input[type="range"] {
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 #blurSlider {
-  width: 100%;
+  /* width: 30%; */
 }
 
 #blurValueDisplay {
-  font-size: 1.2em;
+  /* font-size: 1.2em;
   text-align: center;
-  margin-top: 0.5em;
+  margin-top: 0.5em; */
 }
 
 /* Style the buttons */
@@ -90,7 +106,7 @@ button:hover {
 /* Hide the download buttons and more by default */
 
 #processButton,
-#blur-slider-div,
+#sliders,
 #downloadButtonR,
 #downloadButtonG,
 #downloadButtonB,

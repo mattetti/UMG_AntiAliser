@@ -111,7 +111,7 @@ function loadAndDrawImage(layer) {
   };
   img.src = URL.createObjectURL(input);
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  showBlurSlider();
+  showSliders();
 }
 
 function loadAndDrawImageURL(imgURL, layer) {
@@ -121,7 +121,7 @@ function loadAndDrawImageURL(imgURL, layer) {
   };
   img.src = imgURL;
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
-  showBlurSlider();
+  showSliders();
 }
 
 // Function to apply anti-aliasing, Gaussian blur, and premultiplied alpha to the image
@@ -389,12 +389,12 @@ function mergeCanvases(rCanvas, gCanvas, bCanvas) {
 }
 
 
-function showBlurSlider() {
-  document.getElementById('blur-slider-div').style.display = 'inline';
+function showSliders() {
+  document.getElementById('sliders').style.display = 'flex';
 }
 
 function hideBlurSlider() {
-  document.getElementById('blur-slider-div').style.display = 'none';
+  document.getElementById('sliders').style.display = 'none';
 }
 
 function getMinSize() {
@@ -417,12 +417,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   const sizeSlider = document.getElementById('sizeSlider');
   const sizeValueDisplay = document.getElementById('sizeValueDisplay');
-  sizeValueDisplay.textContent = 'Min Size:' + sizeSlider.value + 'px';
+  sizeValueDisplay.textContent = 'Size:' + sizeSlider.value + 'px';
 
   // Add an event listener to update the size value display
   sizeSlider.addEventListener('input', () => {
     const minSize = sizeSlider.value;
-    sizeValueDisplay.textContent = 'Min Size:' + minSize + 'px';
+    sizeValueDisplay.textContent = 'Size:' + minSize + 'px';
 
     // look for all the canvases with the class 'output-canvas'
     const outputCanvases = document.getElementsByClassName('output-canvas');
