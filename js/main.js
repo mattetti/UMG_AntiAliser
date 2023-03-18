@@ -110,7 +110,12 @@ function loadAndDrawImage(layer) {
     loadInCanvas(img, layer);
   };
   img.src = URL.createObjectURL(input);
-  document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
+  document.getElementById('downloadButton' + layer.toUpperCase()).disabled = false;
+  document.getElementById("downloadButtonAA"+ layer.toUpperCase()).disabled = false;
+  document.getElementById("downloadButtonRGB").disabled = false;
+
+  // document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
+  // document.getElementById('downloadButtonAA' + layer.toUpperCase()).style.display = 'inline';
   showSliders();
 }
 
@@ -121,6 +126,7 @@ function loadAndDrawImageURL(imgURL, layer) {
   };
   img.src = imgURL;
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
+  document.getElementById('downloadButtonAA' + layer.toUpperCase()).style.display = 'inline';
   showSliders();
 }
 
@@ -241,12 +247,12 @@ function isCanvasBlank(canvas) {
 }
 
 function download(layer) {
-  let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
+  let srcCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
   if (layer == 'rgb') {
-    dstCanvas = document.getElementById('packedCanvas');
+    srcCanvas = document.getElementById('packedCanvas');
   }
   // Convert the modified canvas to a blob
-  dstCanvas.toBlob((blob) => {
+  srcCanvas.toBlob((blob) => {
     // Create a URL from the blob
     const url = URL.createObjectURL(blob);
 
@@ -256,6 +262,35 @@ function download(layer) {
     let srcFilename = srcFilenames[layer];
     if (srcFilename === undefined) {
       srcFilename = 'packed-image.png';
+    }
+    const dotIndex = srcFilename.lastIndexOf('.');
+    const extension = ".png";
+    const newFilename = srcFilename.substring(0, dotIndex) + '-' + layer.toUpperCase() + extension;
+    link.download = newFilename;
+
+    // Add the link element to the page and click it to trigger the download
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up the URL and link elements
+    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+  });
+}
+
+function downloadAA(layer) {
+  let srcCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
+  // Convert the modified canvas to a blob
+  srcCanvas.toBlob((blob) => {
+    // Create a URL from the blob
+    const url = URL.createObjectURL(blob);
+
+    // Create a link element
+    const link = document.createElement('a');
+    link.href = url;
+    let srcFilename = srcFilenames[layer];
+    if (srcFilename === undefined) {
+      srcFilename = 'aa-image.png';
     }
     const dotIndex = srcFilename.lastIndexOf('.');
     const extension = ".png";
@@ -486,6 +521,17 @@ window.addEventListener("DOMContentLoaded", (event) => {
   document.getElementById('downloadButtonRGB').addEventListener('click', () => {
     download("rgb");
   });
+
+  document.getElementById('downloadButtonAAR').addEventListener('click', () => {
+    downloadAA("r");
+  });
+  document.getElementById('downloadButtonAAG').addEventListener('click', () => {
+    downloadAA("g");
+  });
+  document.getElementById('downloadButtonAAB').addEventListener('click', () => {
+    downloadAA("b");
+  });
+
 
   document.getElementById('loadExampleButton').addEventListener('click', () => {
     loadAndDrawImageURL("./images/play.svg", "r");

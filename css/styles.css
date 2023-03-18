@@ -49,6 +49,17 @@ h1 {
   margin: 1em;
 }
 
+.canvases > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
+}
+
+.canvases > div > div {
+  padding: 0.3em;
+}
+
 canvas {
   width: 128px;
   height: 128px;
@@ -103,13 +114,16 @@ button:hover {
   background-color: #0056b3;
 }
 
+button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+
 /* Hide the download buttons and more by default */
 
 #processButton,
-#sliders,
-#downloadButtonR,
-#downloadButtonG,
-#downloadButtonB,
-#downloadButtonRGB {
+#sliders
+{
   display: none;
 }
