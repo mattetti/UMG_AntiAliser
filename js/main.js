@@ -29,25 +29,16 @@ function ProcessAll() {
   rgbCtx.drawImage(packedCanvas, 0, 0);
 }
 
-// Function to load and draw the input image onto the canvas
-function loadAndDrawImage(layer) {
-  const inputID = 'fileInput' + layer.toUpperCase();
-  const input = document.getElementById(inputID).files[0];
-  if (input === undefined) {
-    console.log('No file selected');
-    return;
+function loadInCanvas(img, layer) {
+  if(img === undefined || img === null) {
+    console.log('No image for layer ' + layer);
   }
-  srcFilename = input.name;
-  srcFilenames[layer] = input.name;
-
   let srcCanvas = document.getElementById('originalCanvas' + layer.toUpperCase());
   let srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
   let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
   let aaCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
 
-  const img = new Image();
-  img.onload = () => {
-    const minSize = getMinSize();
+  const minSize = getMinSize();
     // Resize the canvas to match the image size
     srcCanvas.width = img.width;
     if (img.width < minSize) {
@@ -101,48 +92,32 @@ function loadAndDrawImage(layer) {
     // processImage(srcCanvas, dstCanvas, layer);
     // processImage(srcCanvas, aaCanvas);
     ProcessAll();
+}
+
+// Function to load and draw the input image onto the canvas
+function loadAndDrawImage(layer) {
+  const inputID = 'fileInput' + layer.toUpperCase();
+  const input = document.getElementById(inputID).files[0];
+  if (input === undefined) {
+    console.log('No file selected');
+    return;
+  }
+  srcFilename = input.name;
+  srcFilenames[layer] = input.name;
+
+  const img = new Image();
+  img.onload = () => {
+    loadInCanvas(img, layer);
   };
   img.src = URL.createObjectURL(input);
-
-
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
   showBlurSlider();
 }
 
 function loadAndDrawImageURL(imgURL, layer) {
-  let srcCanvas = document.getElementById('originalCanvas' + layer.toUpperCase());
-  let srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
-  let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
-  let aaCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
-
   const img = new Image();
   img.onload = () => {
-    // Resize the canvas to match the image size or min size
-    const minSize = getMinSize();
-    if (img.width < minSize) {
-      srcCanvas.width = minSize;
-      const scale = minSize / img.width;
-      srcCanvas.height = img.height * scale;
-    } else {
-      srcCanvas.width = img.width;
-      srcCanvas.height = img.height;
-    }
-    dstCanvas.width = srcCanvas.width;
-    dstCanvas.height = srcCanvas.height;
-    aaCanvas.width = srcCanvas.width;
-    aaCanvas.height = srcCanvas.height;
-
-    const packedCanvas = document.getElementById('packedCanvas');
-    if (srcCanvas.width > packedCanvas.width || srcCanvas.height > packedCanvas.height) {
-      packedCanvas.width = srcCanvas.width;
-      packedCanvas.height = srcCanvas.width;
-    }
-
-    // Draw the image onto the canvas
-    srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
-    const imageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-    processImage(srcCanvas, dstCanvas, layer);
-    processImage(srcCanvas, aaCanvas);
+    loadInCanvas(img, layer);
   };
   img.src = imgURL;
   document.getElementById('downloadButton' + layer.toUpperCase()).style.display = 'inline';
@@ -267,6 +242,9 @@ function isCanvasBlank(canvas) {
 
 function download(layer) {
   let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
+  if (layer == 'rgb') {
+    dstCanvas = document.getElementById('packedCanvas');
+  }
   // Convert the modified canvas to a blob
   dstCanvas.toBlob((blob) => {
     // Create a URL from the blob
@@ -280,7 +258,7 @@ function download(layer) {
       srcFilename = 'packed-image.png';
     }
     const dotIndex = srcFilename.lastIndexOf('.');
-    const extension = srcFilename.substring(dotIndex);
+    const extension = ".png";
     const newFilename = srcFilename.substring(0, dotIndex) + '-aa' + extension;
     link.download = newFilename;
 
@@ -459,7 +437,9 @@ window.addEventListener("DOMContentLoaded", (event) => {
         canvas.height = minSize;
       }
     }
-    ProcessAll();
+    loadAndDrawImage('r');
+    loadAndDrawImage('g');
+    loadAndDrawImage('b');
   });
 
   document.getElementById('fileInputR_Button').addEventListener('click', () => {
