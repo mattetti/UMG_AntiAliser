@@ -24,8 +24,6 @@ h1 {
   color: #999;
 }
 
-/* Style the file pickers */
-
 #file-pickers {
   display: flex;
   justify-content: center;
@@ -40,6 +38,11 @@ h1 {
   color: #fff;
   border: none;
   cursor: pointer;
+}
+
+#loadExampleButton{
+  margin-left: 4em;
+  background-color: #8300ff !important;
 }
 
 /* Style the canvases */
@@ -132,4 +135,12 @@ button:disabled {
 #sliders
 {
   display: none;
+}
+
+#footer {
+  padding-top: 4em;
+  text-align: center;
+  margin-top: 2em;
+  margin: 0 auto;
+  color: #999;
 }

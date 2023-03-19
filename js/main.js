@@ -38,16 +38,17 @@ function loadInCanvas(img, layer) {
   let dstCanvas = document.getElementById('modifiedCanvas' + layer.toUpperCase());
   let aaCanvas = document.getElementById('aaCanvas' + layer.toUpperCase());
 
-  const minSize = getMinSize();
+  const targetSize = getTargetSize();
     // Resize the canvas to match the image size
-    srcCanvas.width = img.width;
-    if (img.width < minSize) {
-      srcCanvas.width = minSize;
-      const scale = minSize / img.width;
+    // check what side of img is larger
+    if (img.width > img.height) {
+      srcCanvas.width = targetSize;
+      const scale = targetSize / img.width;
       srcCanvas.height = img.height * scale;
     } else {
-      srcCanvas.width = img.width;
-      srcCanvas.height = img.height;
+      srcCanvas.height = targetSize;
+      const scale = targetSize / img.height;
+      srcCanvas.width = img.width * scale;
     }
 
     dstCanvas.width = srcCanvas.width;
@@ -132,11 +133,16 @@ function loadAndDrawImageURL(imgURL, layer) {
 function processImage(canvasToProcess, dstCanvas, layerChannel) {
   if(isCanvasBlank(canvasToProcess)) {
     console.log(`processImage: ${canvasToProcess.id} is a blank canvas`);
-    const minSize = getMinSize();
-    canvasToProcess.width = minSize;
-    canvasToProcess.height = minSize;
-    dstCanvas.width = minSize;
-    dstCanvas.height = minSize;
+    const targetSize = getTargetSize();
+    if (canvasToProcess.width > canvasToProcess.height) {
+      canvasToProcess.width = targetSize;
+      canvasToProcess.height = targetSize * canvasToProcess.height / canvasToProcess.width;
+    } else {
+      canvasToProcess.height = targetSize;
+      canvasToProcess.width = targetSize * canvasToProcess.width / canvasToProcess.height;
+    }
+    dstCanvas.width = targetSize;
+    dstCanvas.height = targetSize;
     return;
   }
   let ch = layerChannel == undefined ? 'all' : layerChannel;
@@ -146,15 +152,15 @@ function processImage(canvasToProcess, dstCanvas, layerChannel) {
   const imageData = ctxToProcess.getImageData(0, 0, canvasToProcess.width, canvasToProcess.height);
 
   // Premultiply the alpha channel
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    const r = imageData.data[i];
-    const g = imageData.data[i + 1];
-    const b = imageData.data[i + 2];
-    const a = imageData.data[i + 3];
-    imageData.data[i] = Math.round((r * a) / 255);
-    imageData.data[i + 1] = Math.round((g * a) / 255);
-    imageData.data[i + 2] = Math.round((b * a) / 255);
-  }
+  // for (let i = 0; i < imageData.data.length; i += 4) {
+  //   const r = imageData.data[i];
+  //   const g = imageData.data[i + 1];
+  //   const b = imageData.data[i + 2];
+  //   const a = imageData.data[i + 3];
+  //   imageData.data[i] = Math.round((r * a) / 255);
+  //   imageData.data[i + 1] = Math.round((g * a) / 255);
+  //   imageData.data[i + 2] = Math.round((b * a) / 255);
+  // }
   // TODO: we don't seem to be using this data
 
   // set layerChannel = 'r' to convert the layer to a single red channel;
@@ -430,7 +436,7 @@ function hideBlurSlider() {
   document.getElementById('sliders').style.display = 'none';
 }
 
-function getMinSize() {
+function getTargetSize() {
   return document.getElementById('sizeSlider').value;
 }
 
